@@ -12,9 +12,23 @@ var expect = require('chai').expect;
 var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectId;
 const MONGODB_CONNECTION_STRING = process.env.DB;
+var Mongoose = require('mongoose');
 //Example connection: MongoClient.connect(MONGODB_CONNECTION_STRING, function(err, db) {});
 
+//schema
+var bookSchema = new Mongoose.Schema({
+  book_title: { type: String, required: true },
+  comments: { type: [String] }
+});
+var bookObject = Mongoose.model('bookRecord', bookSchema);
+
 module.exports = function (app) {
+  Mongoose.connect(process.env.DB, { useNewUrlParser: true }, function (err) {
+    if (err) {
+      console.log(err);
+      res.send(err);
+    } else {
+    }});
 
   app.route('/api/books')
     .get(function (req, res){
@@ -25,6 +39,14 @@ module.exports = function (app) {
     .post(function (req, res){
       var title = req.body.title;
       //response will contain new book object including atleast _id and title
+      bookObject.create({'book_title': req.body.title}, function (err, data) {
+        if (err) {
+          console.log(err);
+          res.send(err);
+        } else {
+          res.json({'_id': data._id, 'title': data.book_title});
+        }
+      });
     })
     
     .delete(function(req, res){
