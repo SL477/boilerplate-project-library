@@ -88,6 +88,14 @@ module.exports = function (app) {
     
     .delete(function(req, res){
       //if successful response will be 'complete delete successful'
+      bookrecord.deleteMany({}, function (err) {
+        if (err) {
+          console.log(err);
+          res.send(err);
+        } else {
+          res.send('complete delete successful');
+        }
+      });
     });
 
 
@@ -128,6 +136,18 @@ module.exports = function (app) {
     .delete(function(req, res){
       var bookid = req.params.id;
       //if successful response will be 'delete successful'
+      if (bookid == '') {
+        res.send('no book exists');
+      } else {
+        bookObject.findByIdAndDelete({'_id': bookid}, function (err, doc) {
+          if (err || !doc) {
+            console.log(err);
+            res.send('no book exists');
+          } else {
+            res.send('delete successful');
+          }
+        });
+      }
     });
   
 };
