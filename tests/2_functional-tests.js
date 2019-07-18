@@ -42,10 +42,32 @@ suite('Functional Tests', function() {
       
       test('Test POST /api/books with title', function(done) {
         //done();
+        chai.request(server)
+        .post('/api/books')
+        .send({
+          title: 'Test Title'
+        })
+        .end(function (err, res) {
+          assert.equal(res.status, 200);
+          assert.equal(res.body.title, 'Test Title');
+          assert.isString(res.body._id);
+          done();
+        });
       });
       
       test('Test POST /api/books with no title given', function(done) {
         //done();
+        chai.request(server)
+        .post('/api/books')
+        .send({
+          title: ''
+        })
+        .end(function (err, res) {
+          assert.equal(res.status, 200);
+          assert.equal(res.text, 'missing title');
+          //console.log(res.text);
+          done();
+        });
       });
       
     });

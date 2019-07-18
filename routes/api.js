@@ -23,7 +23,7 @@ var bookSchema = new Mongoose.Schema({
 var bookObject = Mongoose.model('bookRecord', bookSchema);
 var bookrecord = Mongoose.model('bookrecords', bookSchema);
 module.exports = function (app) {
-  Mongoose.connect(process.env.DB, { useNewUrlParser: true }, function (err) {
+  Mongoose.connect(process.env.DB, { useNewUrlParser: true, useFindAndModify: false }, function (err) {
     if (err) {
       console.log(err);
       res.send(err);
@@ -76,14 +76,19 @@ module.exports = function (app) {
     .post(function (req, res){
       var title = req.body.title;
       //response will contain new book object including atleast _id and title
-      bookObject.create({'book_title': req.body.title}, function (err, data) {
-        if (err) {
-          console.log(err);
-          res.send(err);
-        } else {
-          res.json({'_id': data._id, 'title': data.book_title});
-        }
-      });
+      //console.log('hi ' + title);
+      if (title = '' || !title) {
+        res.send('missing title');
+      } else {
+        bookObject.create({'book_title': req.body.title}, function (err, data) {
+          if (err) {
+            console.log(err);
+            res.send(err);
+          } else {
+            res.json({'_id': data._id, 'title': data.book_title});
+          }
+        });
+      }
     })
     
     .delete(function(req, res){
@@ -119,18 +124,26 @@ module.exports = function (app) {
       var bookid = req.params.id;
       var comment = req.body.comment;
       //json res format same as .get
-      bookObject.findByIdAndUpdate({'_id': bookid},{'$push': {'comments':comment}},function (err, docs) {
-        if (err) {
-          console.log(err);
-          res.send(err);
-        } else {
-          console.log(docs._id);
-          console.log(docs.book_title);
-          //console.log(docs.comments);
-          //res.json({"_id": docs._id, 'title': docs.book_title});
-          res.json({"_id": docs._id, 'title': docs.book_title, 'comments': docs.comments });
-        }
-      });
+      console.log(bookid);
+      try{
+        bookObject.findOneAndUpdate({_id: bookid},{'$push': {'comments':comment}}, {new:true},function (err, docs) {
+          if (err || !docs) {
+            console.log(err);
+            res.send('no document to update');
+          } else {
+            console.log(docs);
+            console.log(docs._id);
+            console.log(docs.book_title);
+            //console.log(docs.comments);
+            //res.json({"_id": docs._id, 'title': docs.book_title});
+            res.json({"_id": docs._id, 'title': docs.book_title, 'comments': docs.comments });
+          }
+        });
+      }
+      catch (err){
+        console.log(err);
+        res.send(err.message);
+      }
     })
     
     .delete(function(req, res){
