@@ -34,7 +34,7 @@ suite('Functional Tests', function() {
   /*
   * ----[END of EXAMPLE TEST]----
   */
-
+var bookid;
   suite('Routing tests', function() {
 
 
@@ -51,6 +51,7 @@ suite('Functional Tests', function() {
           assert.equal(res.status, 200);
           assert.equal(res.body.title, 'Test Title');
           assert.isString(res.body._id);
+          bookid = res.body._id;
           done();
         });
       });
@@ -76,6 +77,14 @@ suite('Functional Tests', function() {
     suite('GET /api/books => array of books', function(){
       
       test('Test GET /api/books',  function(done){
+        chai.request(server)
+        .get('/api/books')
+        .end(function (err, res) {
+          assert.equal(res.status, 200);
+          assert.isArray(res.body);
+
+          done();
+        });
         //done();
       });      
       
@@ -86,10 +95,27 @@ suite('Functional Tests', function() {
       
       test('Test GET /api/books/[id] with id not in db',  function(done){
         //done();
+        chai.request(server)
+        .get('/api/books/' + 'aaaaaaaaaaaaaaaaaaaaaaaa')
+        .end(function (err, res) {
+          assert.equal(res.status, 200);
+          assert.equal(res.text, 'no book exists');
+          done();
+        });
       });
       
       test('Test GET /api/books/[id] with valid id in db',  function(done){
         //done();
+        chai.request(server)
+        .get('/api/books/' + bookid)
+        .end(function (err, res) {
+          assert.equal(res.status, 200);
+          //assert.isArray(res.body);
+          assert.equal(res.body._id, bookid);
+          assert.equal(res.body.title, 'Test Title');
+          assert.isArray(res.body.comments);
+          done();
+        });
       });
       
     });
@@ -99,6 +125,16 @@ suite('Functional Tests', function() {
       
       test('Test POST /api/books/[id] with comment', function(done){
         //done();
+        chai.request(server)
+        .post('/api/books/' + bookid)
+        .send({Comment: 'Test'})
+        .end(function (err, res) {
+          assert.equal(res.status, 200);
+          assert.equal(res.body._id, bookid);
+          assert.equal(res.body.title, 'Test Title');
+          assert.isArray(res.body.comments);
+          done();
+        });
       });
       
     });

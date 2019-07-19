@@ -109,13 +109,17 @@ module.exports = function (app) {
     .get(function (req, res){
       var bookid = req.params.id;
       //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
-      bookrecord.findOne({'_id': bookid}).select('_id book_title comments').exec(function (err, docs) {
+      //bookrecord.findOne({'_id': bookid}).select('_id book_title comments').exec(function (err, docs) {
+      bookrecord.findById({'_id': bookid}).select('_id book_title comments').exec(function (err, docs) {
         if (err) {
           console.log(err);
           res.send(err);
         } else {
-          
-          res.json({"_id": docs._id, 'title': docs.book_title, 'comments': docs.comments });
+          if (docs) {
+            res.json({"_id": docs._id, 'title': docs.book_title, 'comments': docs.comments });
+          } else {
+            res.send('no book exists');
+          }
         }
       });
     })
