@@ -21,7 +21,7 @@ app.use(json());
 app.use(urlencoded({ extended: true }));
 
 // Helmet
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(hidePoweredBy({ setTo: 'PHP 4.2.0' }));
 // app.use(noCache());
 
